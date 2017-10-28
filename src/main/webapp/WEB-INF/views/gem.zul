@@ -1,0 +1,55 @@
+<window title="Gem List" border="normal"
+	apply="org.zkoss.bind.BindComposer"
+	viewModel="@id('vm') @init('com.example.vm.GemVM')"
+	onCreate="@command('findAll')" mode="embedded">
+
+	<hbox align="center">
+		<button id="searchButton" label="Search"
+			onClick="@command('findAll')" />
+	</hbox>
+
+	<listbox id="gemListbox" height="260px" mold="paging" pageSize="7"
+		emptyMessage="No Gem found in the result" model="@bind(vm.gems)"
+		selectedItem="@bind(vm.selectedGem) @bind(vm.newSelectedGem)">
+		<listhead menupopup="auto">
+			<listheader label="Id" sort="auto(ids)" />
+			<listheader label="Name" sort="auto(name)" />
+			<listheader label="Description" sort="auto(description)" />
+		</listhead>
+		<template name="model">
+			<listitem>
+				<listcell label="@bind(each.ids)"></listcell>
+				<listcell label="@bind(each.name)"></listcell>
+				<listcell label="@bind(each.description)"></listcell>
+			</listitem>
+		</template>
+	</listbox>
+
+	<hbox style="margin-top:20px">
+		<vbox>
+			<label id="idLabel" value="@bind(vm.ids)"
+				width="200px" />
+			<textbox id="nameLabel"
+				value="@bind(vm.name)" width="200px" />
+			<textbox id="descriptionLabel"
+				value="@bind(vm.description)" width="550px" />
+		</vbox>
+	</hbox>
+
+	<separator spacing="10px" />
+
+	<hbox align="left">
+		<button id="AddButton" label="Add" onClick="@command('save', gemListbox=gemListbox)"
+			height="20px" />
+		<button id="editButton" label="Edit"
+			onClick="@command('edit')" height="20px" />
+		<button id="deleteButton" label="Delete"
+			onClick="@command('delete', gemListbox=gemListbox)" height="20px" />
+		<button id="clearButton" label="Clear Text" height="20px" 
+			 onClick="@command('clear', nameLabel=nameLabel, descriptionLabel=descriptionLabel)"/>
+
+
+		<!--onClick="idLabel.setText(null); nameLabel.setText(null); descriptionLabel.setText(null)" -->
+
+	</hbox>
+</window>

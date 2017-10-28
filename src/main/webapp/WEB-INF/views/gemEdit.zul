@@ -1,0 +1,45 @@
+<window title="Edit Gem" border="normal" width="80%" height="400px" id="GemEditWindow"
+	position="center,center" closable="true"
+	apply="org.zkoss.bind.BindComposer"
+	viewModel="@id('vm') @init('com.example.vm.GemVM')">
+
+	<borderlayout sclass="no-border-in-borderlayout">
+		<center autoscroll="true">
+			<grid>
+				<columns>
+					<column />
+					<column />
+				</columns>
+				<rows>
+					<row>
+						<label value="Id" width="150px" />
+						<hlayout>
+							<label value="@bind(vm.newSelectedGem.ids)" />
+						</hlayout>
+					</row>
+					<row>
+						<label value="Name" width="150px" />
+						<hlayout>
+							<textbox value="@bind(vm.newSelectedGem.name)"
+								width="150px" tabindex="1" />
+						</hlayout>
+					</row>
+					<row>
+						<label value="Description" width="350px" />
+						<hlayout>
+							<textbox value="@bind(vm.newSelectedGem.description)"
+								width="150px" tabindex="1" />
+						</hlayout>
+					</row>
+				</rows>
+			</grid>
+
+		</center>
+		<south height="48px">
+			<div height="100%" align="right">
+				<button id="btnAccept" label="Accept" onClick="@command('update', cmp=GemEditWindow)"></button>
+				<button id="btnCancel" label="Cancel" onClick="GemEditWindow.detach()"></button>
+			</div>
+		</south>
+	</borderlayout>
+</window>
