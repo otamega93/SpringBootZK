@@ -69,8 +69,30 @@ public class GemVM {
 	
 	private Long ids;
 	
-	// Modal window object used to know if the window is minimied or not
+	// Modal window object used to know if the window is minimized or not
 	private Window modalWindowGemEdit;
+	
+	/**
+	 * If the backend uses JWT as auth method, since we cannot access the browser's localstorage, we must set it
+	 * into a server session. Thankfully, ZK gives us a static Session where we can handle every session logic.
+	 * This logic is per thread (that's that getCurrent()), so even if Session is static, we don't end up with 
+	 * wrong credentials nor any leaks.
+	 * 
+	 * Example below:
+	 * 
+	 *  String name = "myCoolVariable";
+        String originalValue = "getMyCoolVariable";
+        Session session = Sessions.getCurrent();
+        session.setAttribute(name, originalValue);
+	 * 
+	 * This solution might solve the problem when we use just one single instance of the ZK view, but if we 
+	 * dare to use more than one instance, we can lose track of the session because we might end up
+	 * going to an instance where the session is not stored. If that's the case, then a global session storage
+	 * would solve the deal (custom solution using Hazelcast or Redis as caches or using Spring session).
+	 * 
+	 * 
+	 */
+	
 	
 	
 	/**
