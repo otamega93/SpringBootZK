@@ -3,10 +3,52 @@
 	viewModel="@id('vm') @init('com.example.vm.GemVM')"
 	onCreate="@command('findAll')" mode="embedded">
 
-	<hbox align="center">
-		<button id="searchButton" label="Search"
-			onClick="@command('findAll')" />
-	</hbox>
+	<menubar autodrop="true">
+		<menu label="Car">
+			<menupopup>
+				<menu label="New">
+					<menupopup>
+						<menuitem label="Small Car" onClick="@command('edit')"/>
+						<menuitem label="Mediem Car" />
+						<menuitem label="Large Car" />
+					</menupopup>
+				</menu>
+				<menuitem label="Search" />
+			</menupopup>
+		</menu>
+		<menu label="Edit">
+			<menupopup>
+				<menuitem label="Undo"
+					image="/widgets/getting_started/menu_toolbar/img/edit_undo.png" />
+				<menuitem label="Redo" disabled="true"
+					image="/widgets/getting_started/menu_toolbar/img/edit_redo.png" />
+				<menuseparator />
+				<menuitem label="Cut"
+					image="/widgets/getting_started/menu_toolbar/img/edit_cut.png" />
+				<menuitem label="Copy"
+					image="/widgets/getting_started/menu_toolbar/img/edit_copy.png" />
+				<menuitem label="Paste"
+					image="/widgets/getting_started/menu_toolbar/img/edit_paste.png" />
+				<menuseparator />
+				<menuitem label="Select All"
+					image="/widgets/getting_started/menu_toolbar/img/edit_select-all.png" />
+			</menupopup>
+		</menu>
+		<menu label="View">
+			<menupopup>
+				<menuitem label="Sort by Name" checkmark="true"
+					autocheck="true" />
+				<menuitem label="Sort by Date" checkmark="true"
+					autocheck="true" />
+			</menupopup>
+		</menu>
+		<menu label="Help">
+			<menupopup>
+				<menuitem label="Help Content" />
+				<menuitem label="About" />
+			</menupopup>
+		</menu>
+	</menubar>
 
 	<listbox id="gemListbox" height="260px" mold="paging" pageSize="7"
 		emptyMessage="No Gem found in the result" model="@bind(vm.gems)"
@@ -27,29 +69,38 @@
 
 	<hbox style="margin-top:20px">
 		<vbox>
-			<label id="idLabel" value="@bind(vm.ids)"
+			<label id="idLabel" value="@bind(vm.ids)" width="200px" />
+			<textbox id="nameLabel" value="@bind(vm.name)"
 				width="200px" />
-			<textbox id="nameLabel"
-				value="@bind(vm.name)" width="200px" />
-			<textbox id="descriptionLabel"
-				value="@bind(vm.description)" width="550px" />
+			<textbox id="descriptionLabel" value="@bind(vm.description)"
+				width="550px" />
 		</vbox>
 	</hbox>
 
 	<separator spacing="10px" />
 
 	<hbox align="left">
-		<button id="AddButton" label="Add" onClick="@command('save', gemListbox=gemListbox)"
+		<button id="AddButton" label="Add"
+			onClick="@command('save', gemListbox=gemListbox)" height="20px" />
+		<button id="editButton" label="Edit" onClick="@command('edit')"
 			height="20px" />
-		<button id="editButton" label="Edit"
-			onClick="@command('edit')" height="20px" />
 		<button id="deleteButton" label="Delete"
-			onClick="@command('delete', gemListbox=gemListbox)" height="20px" />
-		<button id="clearButton" label="Clear Text" height="20px" 
-			 onClick="@command('clear', nameLabel=nameLabel, descriptionLabel=descriptionLabel)"/>
+			onClick="@command('deleteTwo', gemListbox=gemListbox)" height="20px" />
+		<button id="clearButton" label="Clear Text" height="20px"
+			onClick="@command('clear', nameLabel=nameLabel, descriptionLabel=descriptionLabel)" />
 
 
 		<!--onClick="idLabel.setText(null); nameLabel.setText(null); descriptionLabel.setText(null)" -->
-
 	</hbox>
+
+	<separator spacing="10px" />
+
+
+	<div style="float: right">
+		<hbox align="center">
+			<button id="searchButton" label="Search"
+				onClick="@command('findAll')" />
+		</hbox>
+	</div>
+
 </window>

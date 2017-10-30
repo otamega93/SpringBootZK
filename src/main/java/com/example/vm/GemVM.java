@@ -8,17 +8,21 @@ import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestClientException;
+import org.zkoss.bind.annotation.AfterCompose;
 import org.zkoss.bind.annotation.BindingParam;
 import org.zkoss.bind.annotation.Command;
 import org.zkoss.bind.annotation.ContextParam;
 import org.zkoss.bind.annotation.ContextType;
+import org.zkoss.bind.annotation.GlobalCommand;
 import org.zkoss.bind.annotation.Init;
 import org.zkoss.bind.annotation.NotifyChange;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Execution;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.event.EventListener;
+import org.zkoss.zk.ui.select.Selectors;
 import org.zkoss.zk.ui.select.annotation.VariableResolver;
+import org.zkoss.zk.ui.select.annotation.Wire;
 import org.zkoss.zk.ui.select.annotation.WireVariable;
 import org.zkoss.zkplus.spring.DelegatingVariableResolver;
 import org.zkoss.zul.ListModel;
@@ -35,6 +39,10 @@ import com.example.services.IGemService;
 @VariableResolver(DelegatingVariableResolver.class)
 public class GemVM {
 
+	/** 
+	 * This works like an @Autowired but it's managed by ZK. It makes use of Spring.
+	 *  
+	 */
 	@WireVariable
 	private IGemService gemService;
 	
@@ -43,6 +51,16 @@ public class GemVM {
 	private GemResource selectedGem;
 	
 	private GemResource newSelectedGem;
+	
+	/**
+	 * With this @Wire we can get the value of the gemListbox from the gem.zul view. This also needs the
+	 * @AfterCompose annotated method (it's further down).
+	 * 
+	 * It seems it's not accessible from a son view directly, so it must be passed in those cases.
+	 * 
+	 */
+	@Wire
+	private Listbox gemListbox;
 	
 	// Textbox params
 	private String name;
@@ -82,7 +100,7 @@ public class GemVM {
 		
 		if (this.name == null || description == null) {
 			
-			Messagebox.show("Neither the field name nor the field description can be empty", "Error", 0, Messagebox.EXCLAMATION);
+			Messagebox.show("Neither the field name nor the field description can be empty", "Error", 1, Messagebox.EXCLAMATION);
 		
 		}
 			
@@ -128,6 +146,76 @@ public class GemVM {
 		return gemResource;
 	}
 	
+	
+	/**
+	 * Add new Gem to the gem list and to the DB
+	 * 
+	 * @return
+	 * @throws RestClientException
+	 * @throws URISyntaxException
+	 */
+	@Command
+	@NotifyChange("gems")
+	public ResponseEntity<?> deleteTwo(@BindingParam("gemListbox") Listbox listbox) throws RestClientException, URISyntaxException {		
+		GemResource gemResource = new GemResource();
+		
+		if (this.newSelectedGem == null) {
+			
+			Messagebox.show("You must select a Gem from the list first in order to delete it", "Error", 1, Messagebox.EXCLAMATION);
+		
+		}
+			
+		else {	
+			
+	        EventListener<ClickEvent> clickListener = new EventListener<Messagebox.ClickEvent>() {
+	        	
+	            public void onEvent(ClickEvent event) throws Exception {
+	                if(Messagebox.Button.YES.equals(event.getButton())) {
+
+	        			// Deleting the actual thing from DB
+	        			gemService.delete(newSelectedGem);
+	        			
+	        			// Removing from list so we don't need to actually reload by querying the DB to get the updated data
+	        			List<GemResource> updatedList = new ArrayList<GemResource>();
+	        			
+	        			// Create a new list without the currently deleted object
+	        			for (GemResource gemResource : gems) {
+	        				
+	        				if (!newSelectedGem.getIds().equals(gemResource.getIds())) {
+	        					updatedList.add(gemResource);
+	        					//System.out.println(gemResource.getName());
+	        				}
+	        			}
+	        			
+	        			// Saving the new list into the previous one so it can trigger the @NotifyChange("gems")
+	        			gems = updatedList;
+	        			
+	        			selectedGem = null;
+	        			newSelectedGem = null;
+	        			
+	        			// Pass up the new list to the Model of our listBox
+	        			listbox.setModel(new ListModelList<GemResource>(updatedList));
+	        			
+	                    Messagebox.show("The Gem has been deleted.");
+	
+	                }
+	                
+	                else if (Messagebox.Button.CANCEL.equals(event.getButton())) {
+	        			
+	        			return;
+	                }
+	            }
+	        };
+	        Messagebox.show("Are you sure you want to delete this Gem?", "Cancel Gem", new Messagebox.Button[]{
+	                Messagebox.Button.YES, Messagebox.Button.CANCEL }, Messagebox.QUESTION, clickListener);
+			
+	        return null;
+		}
+		
+		return null;
+	}
+	
+	
 	/**
 	 * Update the data from the list and from the DB
 	 * I think this one updates the gems list because when closing the windows it refreshes the main one
@@ -139,7 +227,7 @@ public class GemVM {
 	 */
 	@Command
 	@NotifyChange("gems")
-	public GemResource update(@BindingParam("cmp") Window window) throws RestClientException, URISyntaxException {
+	public GemResource update(@BindingParam("GemEditWindow") Window window) throws RestClientException, URISyntaxException {
 		
 		if (newSelectedGem == null || 
 				(newSelectedGem.getIds() == null)|| 
@@ -231,7 +319,7 @@ public class GemVM {
 		}
 		
 		else
-			Messagebox.show("You must select one gem from the list above", "Error", 0, Messagebox.ERROR);
+			Messagebox.show("You must select one gem from the list above", "Error", 1, Messagebox.ERROR);
 			return null;
 		
 	}
@@ -241,10 +329,11 @@ public class GemVM {
 	 * 
 	 */
 	@Command
+	@NotifyChange("gems")
 	public void clear(@BindingParam("nameLabel") Textbox nameLabel, @BindingParam("descriptionLabel") Textbox descriptionLabel) {
 		
 		// Clean the actual variables which feeds the fields
-		this.setIds(null);;
+		this.setIds(null);
 		this.setName(null);
 		this.setDescription(null);
 		
@@ -253,6 +342,39 @@ public class GemVM {
 		descriptionLabel.setValue(null);
 		
 	}
+	
+	/**
+	 * @GlobalCommand must be used in order to get the listbox (in the father) updated while we're inside the son 
+	 * It seems thanks to this annotation we get the notification of change in every view which uses this VM.
+	 * 
+	 * @param window
+	 */
+	@GlobalCommand
+	@NotifyChange({"gems", "selectedGem", "newSelectedGem"})
+	public void closeAndRefresh(@BindingParam("GemEditWindow") Window window) {
+
+		try {
+			
+			// Reload the list so it can be notified by @NotifyChange
+			gems = findAll();
+			
+		} catch (RestClientException | URISyntaxException e) {
+			e.printStackTrace();
+		}
+
+		// Close the window
+		window.detach();
+	}
+	
+	/**
+	 * This is used in order to get the @Wire annotation to work
+	 * 
+	 * @param view
+	 */
+    @AfterCompose
+    public void afterCompose(@ContextParam(ContextType.VIEW) Component view) {
+        Selectors.wireComponents(view, this, false);
+    }
 	
 	
 	/**
@@ -267,7 +389,8 @@ public class GemVM {
 	}
 	
 	/**
-	 * Command to open a new window over the current one (the gemEdit.zul). 
+	 * Command to open a new window over the current one (the gemEdit.zul). It also pass objects via 
+	 * hashmap
 	 * 
 	 */
 	@Command
@@ -287,6 +410,9 @@ public class GemVM {
 				window.doModal();
 			}
 		}
+		
+		else
+			Messagebox.show("You need to select some Gem from the list", "Error", 1, Messagebox.EXCLAMATION);
 	}
 	
 	

@@ -1,5 +1,5 @@
 <window title="Edit Gem" border="normal" width="80%" height="400px" id="GemEditWindow"
-	position="center,center" closable="true"
+	position="center,center" closable="true" onClose="@command('findAll')" onCancel="@command('findAll')"
 	apply="org.zkoss.bind.BindComposer"
 	viewModel="@id('vm') @init('com.example.vm.GemVM')">
 
@@ -37,8 +37,10 @@
 		</center>
 		<south height="48px">
 			<div height="100%" align="right">
-				<button id="btnAccept" label="Accept" onClick="@command('update', cmp=GemEditWindow)"></button>
-				<button id="btnCancel" label="Cancel" onClick="GemEditWindow.detach()"></button>
+<!-- 				It's possible to execute one @command and one @@global-command inside the same event (onClick in this case) -->
+				<button id="btnAccept" label="Accept" onClick="@command('update', GemEditWindow=GemEditWindow)"></button>
+				<button id="btnCancel" label="Cancel" onClick="@global-command('closeAndRefresh', GemEditWindow=GemEditWindow)"></button>
+<!-- 				<button id="btnCancel" label="Cancel" onClick="GemEditWindow.detach()"></button> -->
 			</div>
 		</south>
 	</borderlayout>
