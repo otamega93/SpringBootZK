@@ -10,3 +10,5 @@ It has some experiments with the ZK framework as for to be become a kinda nice P
 The language of the entire framework can be change in the file zk.xml (changing en for es, for example in the case you need to use spanish).
 
 The window to use can be accessed by going to localhost:8080/gems. This will trigger the Spring controller and will lead to the gem.zul view.
+
+The gemEdit window is now a overlapped window with minimize/maximize options. When minimized, it dissapears until the edit button is clicked again (then it checks first if this windows exist and it's minimized in order to unminimize it or, if it doesn't exist no more, creates a new window component).
