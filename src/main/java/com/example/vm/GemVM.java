@@ -69,6 +69,9 @@ public class GemVM {
 	
 	private Long ids;
 	
+	// Modal window object used to know if the window is minimied or not
+	private Window modalWindowGemEdit;
+	
 	
 	/**
 	 * Query the DB and fill the list
@@ -137,7 +140,7 @@ public class GemVM {
 	                }
 	            }
 	        };
-	        Messagebox.show("Are you sure you want to save this Gem?", "Cancel Gem", new Messagebox.Button[]{
+	        Messagebox.show("Are you sure you want to save this Gem?", "Save Gem", new Messagebox.Button[]{
 	                Messagebox.Button.YES, Messagebox.Button.NO }, Messagebox.QUESTION, clickListener);
 			
 			return gemResource;
@@ -206,7 +209,7 @@ public class GemVM {
 	                }
 	            }
 	        };
-	        Messagebox.show("Are you sure you want to delete this Gem?", "Cancel Gem", new Messagebox.Button[]{
+	        Messagebox.show("Are you sure you want to delete this Gem?", "Delete Gem", new Messagebox.Button[]{
 	                Messagebox.Button.YES, Messagebox.Button.CANCEL }, Messagebox.QUESTION, clickListener);
 			
 	        return null;
@@ -357,6 +360,8 @@ public class GemVM {
 			
 			// Reload the list so it can be notified by @NotifyChange
 			gems = findAll();
+			selectedGem = null;
+			newSelectedGem = null;
 			
 		} catch (RestClientException | URISyntaxException e) {
 			e.printStackTrace();
@@ -396,26 +401,37 @@ public class GemVM {
 	@Command
 	@NotifyChange({"selectedGem", "gems"})
 	public void edit() {
+		
 		if (selectedGem != null) {
 			Map parameters = new HashMap();
 			parameters.put("newSelectedGem", selectedGem);
+			
+			// Check if the window already exist (and if it's minimized)
+			if (modalWindowGemEdit != null && modalWindowGemEdit.isMinimized()) {
+
+				modalWindowGemEdit.setMinimized(false);
+				return;
+			}
+			
 			Component zulComponent = Executions.createComponents("gemEdit.zul", null, parameters);
 			if (zulComponent instanceof Window) {
-				Window window = (Window) zulComponent;
+				modalWindowGemEdit = (Window) zulComponent;
+					
 				/**
 				 *  Show zul as modal (mini window popup dialog like). There five modes availables for windows:  
-				 *  Embedded (default), modal (the one for this gemEdit.zul), overlapped, popup, highlighted 
-				 * 
+				 *  Embedded (default), modal (the one for this gemEdit.zul), overlapped, popup, highlighted 					 * 
 				 */
-				window.doModal();
+				
+				//modalWindowGemEdit.doModal(); //the execution is suspended until window is closed
+				modalWindowGemEdit.doOverlapped(); 
+				
+				}
 			}
+		
+			else
+				Messagebox.show("You need to select some Gem from the list", "Error", 1, Messagebox.EXCLAMATION);
 		}
 		
-		else
-			Messagebox.show("You need to select some Gem from the list", "Error", 1, Messagebox.EXCLAMATION);
-	}
-	
-	
 
 	/**
 	 * Getters and Setters
@@ -469,5 +485,5 @@ public class GemVM {
 	public void setIds(Long ids) {
 		this.ids = ids;
 	}
-	
+
 }

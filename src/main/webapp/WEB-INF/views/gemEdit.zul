@@ -1,6 +1,6 @@
 <window title="Edit Gem" border="normal" width="80%" height="400px" id="GemEditWindow"
-	position="center,center" closable="true" onClose="@command('findAll')" onCancel="@command('findAll')"
-	apply="org.zkoss.bind.BindComposer"
+	position="center,center" closable="true" onClose="@global-command('closeAndRefresh', GemEditWindow=GemEditWindow)" onCancel="@command('findAll')"
+	apply="org.zkoss.bind.BindComposer" maximizable="true" minimizable="true" 
 	viewModel="@id('vm') @init('com.example.vm.GemVM')">
 
 	<borderlayout sclass="no-border-in-borderlayout">

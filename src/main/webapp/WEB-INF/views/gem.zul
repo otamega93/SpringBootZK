@@ -8,7 +8,8 @@
 			<menupopup>
 				<menu label="New">
 					<menupopup>
-						<menuitem label="Small Car" onClick="@command('edit')"/>
+						<menuitem label="Small Car"
+							onClick="@command('edit')" />
 						<menuitem label="Mediem Car" />
 						<menuitem label="Large Car" />
 					</menupopup>
@@ -67,6 +68,10 @@
 		</template>
 	</listbox>
 
+<!-- This updates the list  every 5 seconds -->
+<!-- 	<timer id="timer" delay="5000" repeats="true" -->
+<!-- 		onTimer="@command('findAll')" /> -->
+
 	<hbox style="margin-top:20px">
 		<vbox>
 			<label id="idLabel" value="@bind(vm.ids)" width="200px" />
@@ -94,7 +99,6 @@
 	</hbox>
 
 	<separator spacing="10px" />
-
 
 	<div style="float: right">
 		<hbox align="center">
